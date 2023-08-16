@@ -1,7 +1,5 @@
-package com.example.demo
+package com.example.starter.util
 
-import java.awt.geom.AffineTransform
-import java.awt.image.AffineTransformOp
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -14,7 +12,7 @@ import javax.imageio.ImageIO
 
 
 @Throws(IOException::class)
-fun base64ToImage(data: String, width: Int, height: Int): BufferedImage? {
+fun base64ToImage(data: String, width: Int, height: Int): BufferedImage {
     val originalImage = getBufferedImage(data)
     return createScaledBufferedImage(originalImage, width, height)
 }
@@ -31,9 +29,9 @@ fun createScaledBufferedImage(
     height: Int
 ): BufferedImage {
     val resizedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-	val graphics = resizedImage.createGraphics()
-	graphics.drawImage(bufferedImage, 0, 0, width, height, null)
-	graphics.dispose()
+    val graphics = resizedImage.createGraphics()
+    graphics.drawImage(bufferedImage, 0, 0, width, height, null)
+    graphics.dispose()
     return resizedImage
 }
 

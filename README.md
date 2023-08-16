@@ -5,10 +5,9 @@ This project provides a REST API for image segmentation using a pre-trained neur
 ## Prerequisites
 
 - Java 8 or later
-- Spring Boot
+- Vertx
 - PyTorch (for the model inference)
 - Gradle (for building the project)
-- Docker (optional, for containerizing the application)
 
 ## Installation
 
@@ -18,15 +17,19 @@ This project provides a REST API for image segmentation using a pre-trained neur
    git clone https://github.com/yourusername/image-segmentation-classifier.git
 2. Download Pytorch lib and export
   ```bash
-  https://pytorch.org/get-started/locally/)https://pytorch.org/get-started/locally/
+    https://pytorch.org/get-started/locally/)https://pytorch.org/get-started/locally/
 ```
 
 ## Usage
+1. Run on terminal this command:  
+   ```
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/exported/pytorch/folder/pytorch/lib
+
 1. Open the project in your preferred IDE.
 2. Run the Spring Boot application with in terminal
    ```bash
-   ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Djava.library.path=/export/pytorch/path/libtorch/lib"
-  
+   ./gradlew clean run
+
 Use an API client (e.g., cURL, Postman) to send POST requests to the API endpoint for image segmentation.
 
 ## API Documentation

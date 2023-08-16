@@ -1,4 +1,4 @@
-package com.example.demo
+package com.example.starter.util
 
 import org.pytorch.MemoryFormat
 import org.pytorch.Tensor
