@@ -1,5 +1,6 @@
-package com.example.starter.util
-
+import com.example.starter.util.Compute
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -10,29 +11,26 @@ import java.nio.file.Paths
 import java.util.*
 import javax.imageio.ImageIO
 
-
 @Throws(IOException::class)
-fun base64ToImage(data: String, width: Int, height: Int): BufferedImage {
+suspend fun base64ToImage(data: String, width: Int, height: Int): BufferedImage = withContext(Dispatchers.IO) {
     val originalImage = getBufferedImage(data)
-    return createScaledBufferedImage(originalImage, width, height)
+    createScaledBufferedImage(originalImage, width, height)
 }
 
-private fun getBufferedImage(encoded: String): BufferedImage {
+private suspend fun getBufferedImage(encoded: String): BufferedImage = withContext(Dispatchers.IO) {
     val imageBytes = Base64.getDecoder().decode(encoded)
     val bis = ByteArrayInputStream(imageBytes)
-    return ImageIO.read(bis)
+    ImageIO.read(bis)
 }
 
-fun createScaledBufferedImage(
-    bufferedImage: BufferedImage,
-    width: Int,
-    height: Int
-): BufferedImage {
+suspend fun createScaledBufferedImage(
+    bufferedImage: BufferedImage, width: Int, height: Int
+): BufferedImage = withContext(Dispatchers.Default) {
     val resizedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
     val graphics = resizedImage.createGraphics()
     graphics.drawImage(bufferedImage, 0, 0, width, height, null)
     graphics.dispose()
-    return resizedImage
+    resizedImage
 }
 
 fun BufferedImage.toByteArray(imageFileType: String = "png"): String {

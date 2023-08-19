@@ -1,5 +1,7 @@
 package com.example.starter.util
-import java.nio.file.Paths;
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.bio.npy.NpyFile.read
 import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.ndarray
@@ -10,24 +12,25 @@ import org.jetbrains.kotlinx.multik.ndarray.data.set
 import org.pytorch.IValue
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.nio.file.Paths
 import kotlin.math.abs
 import kotlin.math.pow
 
 
-class Compute(list: List<IValue>, img_size: Int) {
+class Compute(val list: List<IValue>, val img_size: Int) {
     //    var size = mk[32, 64, 128, 256]
-    var size: List<Int>
+    lateinit var size: List<Int>
     var channel = mk[42, 33]
     var d_masks: ArrayList<D2Array<Int>> = ArrayList()
     var d_depths: ArrayList<D2Array<Int>> = ArrayList()
     var q_masks: ArrayList<D2Array<Int>> = ArrayList()
     var q_depths: ArrayList<D2Array<Int>> = ArrayList()
-    var file1 = read(Paths.get(System.getProperty("user.dir")+ "/" + "mask.npy"))
+    var file1 = read(Paths.get(System.getProperty("user.dir") + "/" + "mask.npy"))
     var mask_color = mk.ndarray(file1.asIntArray(), file1.shape[0], file1.shape[1])
-    var file2 = read(Paths.get(System.getProperty("user.dir")+ "/" +"depth.npy"))
+    var file2 = read(Paths.get(System.getProperty("user.dir") + "/" + "depth.npy"))
     var depth_color = mk.ndarray(file2.asIntArray(), file2.shape[0], file2.shape[1])
 
-    init {
+    suspend fun init() {
 
         var t_size: ArrayList<Int> = ArrayList()
         for (cnt in 0..3) {
@@ -95,20 +98,21 @@ class Compute(list: List<IValue>, img_size: Int) {
         }
     }
 
-    fun quad(t0: D2Array<Int>, t1: D2Array<Int>, size: Int): D2Array<Int> {
-        var out = mk.zeros<Int>(t1.shape[0], t1.shape[1])
+    suspend fun quad(
+        t0: D2Array<Int>, t1: D2Array<Int>, size: Int
+    ): D2Array<Int> = withContext(Dispatchers.Default) {
+        val out = mk.zeros<Int>(t1.shape[0], t1.shape[1])
         for (i in 0 until size) {
             for (j in 0 until size) {
                 for (a in 0 until 2) {
                     for (b in 0 until 2) {
-                        var value = abs(t1[i * 2 + a, j * 2 + b] - t0[i, j])
+                        val value = abs(t1[i * 2 + a, j * 2 + b] - t0[i, j])
                         out[i * 2 + a, j * 2 + b] = value
                     }
                 }
-
             }
         }
-        return out
+        out
     }
 
     fun getmask(index: Int): BufferedImage {
@@ -117,9 +121,7 @@ class Compute(list: List<IValue>, img_size: Int) {
         for (i in 0 until size[index]) {
             for (j in 0 until size[index]) {
                 val color = Color(
-                    mask_color[rgb_array[i, j], 0],
-                    mask_color[rgb_array[i, j], 1],
-                    mask_color[rgb_array[i, j], 2]
+                    mask_color[rgb_array[i, j], 0], mask_color[rgb_array[i, j], 1], mask_color[rgb_array[i, j], 2]
                 )
                 bufferedImage.setRGB(j, i, color.rgb)
             }
@@ -133,9 +135,7 @@ class Compute(list: List<IValue>, img_size: Int) {
         for (i in 0 until size[index]) {
             for (j in 0 until size[index]) {
                 val color = Color(
-                    depth_color[rgb_array[i, j], 0],
-                    depth_color[rgb_array[i, j], 1],
-                    depth_color[rgb_array[i, j], 2]
+                    depth_color[rgb_array[i, j], 0], depth_color[rgb_array[i, j], 1], depth_color[rgb_array[i, j], 2]
                 )
                 bufferedImage.setRGB(j, i, color.rgb)
             }
@@ -143,36 +143,32 @@ class Compute(list: List<IValue>, img_size: Int) {
         return bufferedImage
     }
 
-    fun get_q_mask(index: Int): BufferedImage {
+    suspend fun get_q_mask(index: Int): BufferedImage = withContext(Dispatchers.Default) {
         val rgb_array = q_masks[index]
         val bufferedImage = BufferedImage(size[index], size[index], BufferedImage.TYPE_INT_ARGB)
         for (i in 0 until size[index]) {
             for (j in 0 until size[index]) {
                 val color = Color(
-                    mask_color[rgb_array[i, j], 0],
-                    mask_color[rgb_array[i, j], 1],
-                    mask_color[rgb_array[i, j], 2]
+                    mask_color[rgb_array[i, j], 0], mask_color[rgb_array[i, j], 1], mask_color[rgb_array[i, j], 2]
                 )
                 bufferedImage.setRGB(j, i, color.rgb)
             }
         }
-        return bufferedImage
+        return@withContext bufferedImage
     }
 
-    fun get_q_depth(index: Int): BufferedImage {
+    suspend fun get_q_depth(index: Int): BufferedImage = withContext(Dispatchers.Default) {
         val rgb_array = q_depths[index]
         val bufferedImage = BufferedImage(size[index], size[index], BufferedImage.TYPE_INT_ARGB)
         for (i in 0 until size[index]) {
             for (j in 0 until size[index]) {
                 val color = Color(
-                    depth_color[rgb_array[i, j], 0],
-                    depth_color[rgb_array[i, j], 1],
-                    depth_color[rgb_array[i, j], 2]
+                    depth_color[rgb_array[i, j], 0], depth_color[rgb_array[i, j], 1], depth_color[rgb_array[i, j], 2]
                 )
                 bufferedImage.setRGB(j, i, color.rgb)
             }
         }
-        return bufferedImage
+        return@withContext bufferedImage
     }
 
 }

@@ -1,23 +1,32 @@
-package com.example.starter.util
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.pytorch.Module
-
 
 object ModelRepository {
   private val modelMap = mutableMapOf<String, Module>()
-  fun readModelFromResources(modelName: String): Pair<String, Module?> {
+
+  suspend fun readModelFromResources(modelName: String): Pair<String, Module?> {
     if (modelMap.containsKey(modelName)) {
       return Pair(modelName, modelMap[modelName])
     }
-    System.out.println("User Dir============= " + System.getProperty("user.dir"))
-    return Pair(modelName, Module.load(System.getProperty("user.dir") + "/" + modelName).apply {
-        modelMap[modelName] = this
-      })
 
-    throw Exception("Model not found")
+    val model: Module? = loadModuleFromResources(modelName)
+    if (model != null) {
+      modelMap[modelName] = model
+      return Pair(modelName, model)
+    } else {
+      throw Exception("Model not found")
+    }
   }
 
-
+  private suspend fun loadModuleFromResources(modelName: String): Module? = withContext(Dispatchers.IO) {
+    System.out.println("User Dir============= " + System.getProperty("user.dir"))
+    try {
+      Module.load(System.getProperty("user.dir") + "/" + modelName)
+    } catch (e: Exception) {
+      null
+    }
+  }
 }
 
 fun Module.size(modelName: String): Int {

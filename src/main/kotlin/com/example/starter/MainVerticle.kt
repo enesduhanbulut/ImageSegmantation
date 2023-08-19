@@ -29,7 +29,7 @@ class MainVerticle : CoroutineVerticle() {
     val config = retriever.config.await()
 
     vertx.deployVerticle(HTTPVerticle(), DeploymentOptions().setConfig(config)).await()
-    vertx.deployVerticle(RestService(), DeploymentOptions().setConfig(config).setWorker(true)).await()
+    vertx.deployVerticle(RestService(), DeploymentOptions().setConfig(config).setWorker(true).setInstances(4).setWorkerPoolSize(40)).await()
 
 
   }
